@@ -14,17 +14,20 @@ $if(CJKmainfont)$
 $endif$
 \documentclass[
 a4paper,
-twoside
 ]{$documentclass$}
 
 \usepackage[
     includehead,% See below for an explanation
-    headheight=2cm,% Set \headheight to 2cm
+    headheight=1cm,% Set \headheight to 2cm
+    tmargin=1cm,
+    lmargin=2.5cm,
+    rmargin=2.5cm,
+    bmargin=2cm,  
 ]{geometry}
 
 \usepackage{graphicx}
 \usepackage[table,xcdraw]{xcolor}
-\usepackage{a4wide}
+\usepackage{layout}
 \usepackage{fancyhdr}
 \usepackage{lastpage}
 \usepackage{soul}
@@ -305,6 +308,7 @@ $abstract$
 \end{abstract}
 $endif$
 $endif$
+\layout
 
 $for(include-before)$
 $include-before$

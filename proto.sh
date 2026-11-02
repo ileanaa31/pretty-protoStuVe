@@ -22,11 +22,6 @@ if ! command -v git &> /dev/null; then
     exit 1
 fi
 
-## jq
-if ! command -v jq &> /dev/null; then
-    echo "jq could not be found. Please install jq if you want the \pegel command to work"
-fi
-
 ## Ubuntu Font
 if ! fc-list | grep -q "Ubuntu"; then
     echo "Ubuntu font could not be found. Please install the Ubuntu font."
@@ -70,6 +65,15 @@ tocSubtitle=""                          # The subtitle of the table of contents
 show=false                              # Show the compiled pdf
 intro=""                                # The introduction to the protocol
 outro=""                                # The outro to the protocol
+legislatur="14"                          # The legislatur of the Gremium
+gremium="FSK"                             # The gremium
+sitzungsnummer="XX"                      # The sitzungsnummer of the protocol
+datum="XXXX-XX-XX"                                # The date of the protocol
+ort="G227"                                  # The location of the protocol
+sitzungsleitung=""                    # The sitzungsleitung of the protocol
+redeleitung=""                        # The redeleitung of the protocol
+schriftfuehrung=""                      # The schriftführung of the protocol
+
 
 ## DOWNLOAD
 download=false
@@ -136,7 +140,6 @@ parse_frontmatter() {
         key=$(echo $line | cut -d: -f1 | tr -d '[:space:]')
 	value=$(echo $line | cut -d: -f2- | sed -r 's/^\s*"?([^"]*)"?$/\1/')
         case $key in
-            title) name=$value ;;
             font) font=$value ;;
             logo) logo=$value ;;
             tocTitle) tocTitle=$value ;;
@@ -144,6 +147,15 @@ parse_frontmatter() {
             intro) intro=$value ;;
             outro) outro=$value ;;
 	    sigline) sigline=$value ;;
+        legislatur) legislatur=$value ;;
+        gremium) gremium=$value ;;
+        sitzungsnummer) sitzungsnummer=$value ;;
+        datum) datum=$value ;;
+        ort) ort=$value ;;
+        sitzungsleitung) sitzungsleitung=$value ;;
+        redeleitung) redeleitung=$value ;;
+        schriftfuehrung) schriftfuehrung=$value ;;
+
         esac
     done <<< $(echo "$1" | sed -n '2,$p')
 }
@@ -233,15 +245,9 @@ if [ -n "$frontmatter" ]; then
     sed -i '/^---$/,/^---$/d' $tmpfile
 fi
 
-# If the name is not set (by the frontmatter), try to find it in the text
-if [ -z "$name" ]; then
-    # Try to find the name of the protocol
-    name=$(grep -E ".?Az\." $tmpfile | sed -E 's/.*Az\.\s*(.*Protokoll).*/\1/')
-    if [ -z "$name" ]; then
-        echo "Could not figure out the name of the protocol."
-        name="protocol"
-    fi
-fi
+# Define name as legislatur.gremium.datum.Protokoll-sitzungsnummer
+name="${legislatur}.${gremium}.${datum}.Protokoll-${sitzungsnummer}"
+
 
 # If the download and keep flags are set, keep the markdown file
 if [ "$download" = true ] && [ "$keep" = true ]; then
@@ -256,38 +262,6 @@ latex="$name.tex"
 # Determine if sigline is already in markdown (for legacy reasons)
 tmpfile_content=$(cat $tmpfile)
 sigline_content=""
-
-# replace \pegel with the water level of the Bodensee
-if [[ $tmpfile_content == *\\pegel* ]]; then
-    # api to get the water level
-    api_url="https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/KONSTANZ/W/"
-    # if the name of the protocol was set without date, use the current water level
-    if [[ "$name" == protocol ]]; then
-        pegel="[$(curl -s "${api_url}currentmeasurement.json" | jq -r '.value')cm](https://www.bodenseee.net/pegel/)"
-    else
-        # get the date from the name
-        prefix="SFS_Informatik."
-        suffix=".Protokoll"
-        date="$(echo "$name" | sed -e "s/^$prefix//" -e "s/$suffix$//")T"
-        # get the closing time of the conference 
-        time=$(grep -E "geschlossen" $tmpfile | grep -o -E "[0-9]{2}:[0-9]{2}")
-        # if time is not set, use 17:00
-        if [ -z "$time" ]; then
-            time="17:00:00+02:00"
-        else
-            #round time to the last 15minutes
-            hours=${time:0:2}
-            minutes=${time:3:2}
-	    minutes=$(sed -r 's/0*([0-9]*)/\1/' <<< $minutes)
-            minutes=$((minutes - minutes % 15))
-            time="$hours:$minutes:00+02:00"
-        fi
-        # ge the waterlevel for the date and time of the conference
-        pegel="[$(curl -s "${api_url}measurements.json?start=$date$time" | jq -r '.[0].value')cm](https://www.bodenseee.net/pegel/)"
-    fi
-    # replace \pegel with the current water level in tmpfile
-    echo "${tmpfile_content/\\pegel/$pegel}" > $tmpfile
-fi
 
 
 if [ -f "$sigline" ]; then
