@@ -23,14 +23,14 @@ keine Fragent
 
 # Berichte aus zentralen Gremien
 
-Vorsitz: 
-- Wahlen von heute 12:00 bis Donnerstag 12:00
--  VV am 17.06.
-- Innenhofparty am 26.06.
-- Treffen heute, 
-    - zur Arche um 15:00
-    - zum Campusfestival um 17:00
-- Zum Campsufestival freuen wir uns über Erfahrungen und Meinungen
+Vorsitz: \\
+- Wahlen von heute 12:00 bis Donnerstag 12:00\\
+-  VV am 17.06.\\
+- Innenhofparty am 26.06.\\
+- Treffen heute, \\
+    - zur Arche um 15:00\\
+    - zum Campusfestival um 17:00\\
+- Zum Campsufestival freuen wir uns über Erfahrungen und Meinungen\\
 
 
 # Erfahrungsberichte
